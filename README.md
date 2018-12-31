@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # School-search-api - 전국 학교 API
 
 ### API 설명
@@ -55,3 +56,7 @@ http://jrady721.cafe24.com/api/school/소프트
 전국 급식 API: https://github.com/Jrady721/School-meal-api  
 웹 사이트: http://jrady721.cafe24.com/meal    
 구글(웨일) 확장프로그램: https://github.com/Jrady721/School-meal-extension
+=======
+# School-search-api
+
+>>>>>>> origin/master
