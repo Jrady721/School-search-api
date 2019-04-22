@@ -1,92 +1,80 @@
 <?php
+
 include 'include/simple_html_dom.php';
 
 // 학교정보 API, 이름, 소속, 구분, 주소, 코드 가져오기
-function getSchoolData($search = '') {
+function getSchool($search)
+{
     Header('Content-Type: application/json');
 
-    if ($search === '') {
-        return json_encode(array('status' => '400', 'message' => '검색어를 입력해주세요.'), JSON_UNESCAPED_UNICODE + JSON_PRETTY_PRINT);
-    } else {
-        // 인코딩
-        $search = iconv("UTF-8", "EUC-KR", $search);
-    }
+    // 인코딩
+    $search = iconv("UTF-8", "EUC-KR", $search);
 
     // url 설정
     $url = "https://www.schoolinfo.go.kr/ei/ss/Pneiss_f01_l0.do?SEARCH_SCHUL_NM=$search";
 
+    // json 설정
     $json = array('status' => '200');
 
+    // 학교 목록 초기화
     $schools = array();
 
-    // 20개 까지만 (school info라는 사이트가 20개씩 보여준다..)
+    // 순서대로 학교목록 20개를 불러온다. (불러오는 사이트에서 그렇게 설정되어있음)
     foreach (file_get_html($url)->find('.SchoolList') as $e) {
-        // html 제거
+        // 주소에서 불필요한 element 제거
         $e->find('span.InfoTitle', 1)->outertext = '';
 
-        $office = iconv("EUC-KR","UTF-8", $e->find('span.mapD_Area', 0)->innertext);
+        $officeKR = iconv("EUC-KR", "UTF-8", $e->find('span.mapD_Area', 0)->innertext);
+        $officeArr = array(
+            '강원' => 'kwe',
+            '경기' => 'goe',
+            '경남' => 'gne',
+            '경북' => 'kbe',
+            '광주' => 'gen',
+            '대구' => 'dge',
+            '대전' => 'dje',
+            '부산' => 'pen',
+            '서울' => 'sen',
+            '세종' => 'sje',
+            '울산' => 'use',
+            '인천' => 'ice',
+            '전남' => 'jne',
+            '전북' => 'jbe',
+            '제주' => 'jje',
+            '충남' => 'cne',
+            '충북' => 'cbe'
+        );
 
-        // 교육청별로 url 주소를 다리한다.
-        if($office == "서울") {
-            $office = "sen.go.kr";
-        } else if ($office == "경기") {
-            $office = "goe.go.kr";
-        } else if ($office == "강원") {
-            $office = "kwe.go.kr";
-        } else if ($office == "전남") {
-            $office = "jne.go.kr";
-        } else if ($office == "전북") {
-            $office = "jbe.go.kr";
-        } else if ($office == "경남") {
-            $office = "gne.go.kr";
-        } else if ($office == "경북") {
-            $office = "kbe.go.kr";
-        } else if ($office == "부산") {
-            $office = "pen.go.kr";
-        } else if ($office == "제주") {
-            $office = "jje.go.kr";
-        } else if ($office == "충남") {
-            $office = "cne.go.kr";
-        } else if ($office == "충북") {
-            $office = "cbe.go.kr";
-        } else if ($office == "광주") {
-            $office = "gen.go.kr";
-        } else if ($office == "울산") {
-            $office = "use.go.kr";
-        } else if ($office == "대전") {
-            $office = "dje.go.kr";
-        } else if ($office == "인천") {
-            $office = "ice.go.kr";
-        } else if ($office == "대구") {
-            $office = "dge.go.kr";
-        } else if ($office == "세종") {
-            $office = "sje.go.kr";
-        }
+        $office = $officeArr[$officeKR] . '.go.kr';
 
         // level 즉 학교의 구분을 의미한다. (euc-kr 포맷을 utf-8 포맷으로 변경한다.)
-        $level = iconv("EUC-KR","UTF-8", $e->find('span.mapD_Class', 0)->innertext);
+        $level = iconv("EUC-KR", "UTF-8", $e->find('span.mapD_Class', 0)->innertext);
 
-        if($level == "고") {
-            $level = 4;
-        } else if ($level == "중") {
-            $level = 3;
-        } else if ($level == "초") {
+
+        // 특수학교처럼 별도의 학교들은 그냥 level을 4로 통일하였다. (문제없음)
+        if ($level === '초') {
             $level = 2;
-        } else if ($level == "특") { // 특수학교의 경우.. 그냥 level을 4로 맞춰었다. 정확히 테스트 해보지는 않았으나. level은 별로 상관없는 듯 하다.
+        } else if ($level === '중') {
+            $level = 3;
+        } else {
             $level = 4;
         }
 
-        $address = iconv("EUC-KR","UTF-8", $e->find('li', 1)->innertext);
+        // 주소
+        $address = iconv("EUC-KR", "UTF-8", $e->find('li', 1)->innertext);
 
-
+        // 이름과 코드를 가지고 있다.
         $obj = $e->find('h1.School_Name a', 0);
-        $name = iconv("EUC-KR","UTF-8", $obj->innertext);
+
+        // 이름
+        $name = iconv("EUC-KR", "UTF-8", $obj->innertext);
+
         // 코드
         preg_match("/\'.*\'/iU", $obj->onclick, $match);
-        $code = str_replace("'","", $match[0]);
+        $code = str_replace("'", "", $match[0]);
 
-        $temp = array('name'=> $name, 'code' => $code, 'office' => $office, 'level' => $level, 'address' => $address);
-        array_push($schools, $temp);
+        $school = array('name' => $name, 'code' => $code, 'office' => $office, 'level' => $level, 'address' => $address);
+        array_push($schools, $school);
     }
 
     $json['schools'] = $schools;
@@ -94,5 +82,5 @@ function getSchoolData($search = '') {
     return json_encode($json, JSON_UNESCAPED_UNICODE + JSON_PRETTY_PRINT);
 }
 
- echo getSchoolData('소프트');
-?>
+// 사용
+// echo getSchool('소프트');

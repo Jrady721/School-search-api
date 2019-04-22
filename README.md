@@ -1,9 +1,15 @@
-# School-search-api - 전국 학교 API
+# school-search-api - 전국 학교 API
 
 ### API 설명
 ```
 이 API는 특정 검색어를 입력하면 검색어와 관련된 학교의 정보를 가져오는 API입니다.
 ```
+
+### 버전 관리 (현재버전: V1.01)
+V1.00
+ - 전국의 모든 학교를 검색기능 구현
+V1.01
+ - simple_html_dom 1.8.1 업데이트
 
 ### GET
 ```
@@ -13,7 +19,7 @@ http://jrady721.cafe24.com/api/school/검색어 (GET)
 > **검색어 (search)**
 ```
 형식: 문자열
-ex 소프트
+EX: 소프트
 ```
 
 > **예시 (example)**  
@@ -50,8 +56,8 @@ http://jrady721.cafe24.com/api/school/소프트
 }
 ```
 
-> **활용**
+### 활용
 
-전국 급식 API: https://github.com/Jrady721/School-meal-api  
+전국 급식 API: https://github.com/Jrady721/school-meal-api  
 웹 사이트: http://jrady721.cafe24.com/meal    
-구글(웨일) 확장프로그램: https://github.com/Jrady721/School-meal-extension
+구글(웨일) 확장프로그램: https://github.com/Jrady721/school-meal-extension
